@@ -1,0 +1,985 @@
+<!DOCTYPE html><html lang=zh-CN><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1" name=viewport><title>RK3588搭建 VPN | Yongjian Peng 的技术博客</title><meta content="基于 Windows VPS 与 SSH 反向隧道，为没有公网 IP 的 RK3588 设备建立远程维护通道，记录密钥配置、autossh、systemd 自动上线、多设备接入与排障过程。" name=description><meta content="Yongjian Peng" name=web_author><meta content="Astro v4.14.2" name=generator><meta content=#f7f3eb name=theme-color><meta content=website property=og:type><meta content=zh_CN property=og:locale><meta content=https://yongjian-peng.github.io/posts/rk3588-vpn/ property=og:url><meta content="RK3588搭建 VPN | Yongjian Peng 的技术博客" property=og:title><meta content="Yongjian Peng 的技术博客" property=og:site_name><meta content="基于 Windows VPS 与 SSH 反向隧道，为没有公网 IP 的 RK3588 设备建立远程维护通道，记录密钥配置、autossh、systemd 自动上线、多设备接入与排障过程。" property=og:description><meta content=https://yongjian-peng.github.io/assets/rk3588-remote-maintenance-cover.BaznMIi5_Z1M2NoD.webp property=og:image><meta content=summary_large_image name=twitter:card><meta content="RK3588搭建 VPN | Yongjian Peng 的技术博客" name=twitter:title><meta content="基于 Windows VPS 与 SSH 反向隧道，为没有公网 IP 的 RK3588 设备建立远程维护通道，记录密钥配置、autossh、systemd 自动上线、多设备接入与排障过程。" name=twitter:description><meta content=https://yongjian-peng.github.io/assets/rk3588-remote-maintenance-cover.BaznMIi5_Z1M2NoD.webp name=twitter:image><link href=https://yongjian-peng.github.io/posts/rk3588-vpn/ rel=canonical><link href=/sitemap-index.xml rel=sitemap><link href=/favicon.ico rel=icon sizes=any><link href=/assets/yp-logo.Cy2_YaY7.png rel=apple-touch-icon><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","inLanguage":"zh-CN","@id":"https://yongjian-peng.github.io/posts/rk3588-vpn/","url":"https://yongjian-peng.github.io/posts/rk3588-vpn/","headline":"RK3588搭建 VPN","description":"基于 Windows VPS 与 SSH 反向隧道，为没有公网 IP 的 RK3588 设备建立远程维护通道，记录密钥配置、autossh、systemd 自动上线、多设备接入与排障过程。","datePublished":"2026-10-13T16:00:00.000Z","dateModified":"2026-10-13T16:00:00.000Z","author":{"@type":"Person","name":"Yongjian Peng","url":"https://yongjian-peng.github.io"}}</script><script>try{const e=localStorage.getItem("hs_theme");document.documentElement.classList.toggle("dark","dark"===e||!e&&matchMedia("(prefers-color-scheme: dark)").matches)}catch(e){}</script><script type=text/partytown src=https://cloud.umami.is/script.js data-website-id=bf63658a-9418-4f39-a6a1-5a0cedb6e429></script><link href=/assets/_slug_.ByBqqpi5.css rel=stylesheet><script type=module src=/assets/hoisted.aloKDCbF.js></script><script type=module src=/assets/page.DFwqf4PB.js></script><script>!function(t,e,n,r){(window.crossOriginIsolated||navigator.serviceWorker)&&((r=t[e]=Object.assign(t[e]||{},{lib:"/~partytown/",debug:!1}))[n]=r[n]||[])}(window,"partytown","forward");const t={preserveBehavior:!1},e=e=>{if("string"==typeof e)return[e,t];const[n,r=t]=e;return[n,{...t,...r}]},n=Object.freeze((()=>{const t=new Set;let e=[];do{Object.getOwnPropertyNames(e).forEach(n=>{"function"==typeof e[n]&&t.add(n)})}while((e=Object.getPrototypeOf(e))!==Object.prototype);return Array.from(t)})());!function(t,r,o,i,a,s,c,d,l,p,u=t,f){function y(){f||(f=1,"/"==(c=(s.lib||"/~partytown/")+(s.debug?"debug/":""))[0]&&(l=r.querySelectorAll('script[type="text/partytown"]'),i!=t?i.dispatchEvent(new CustomEvent("pt1",{detail:t})):(d=setTimeout(h,1e4),r.addEventListener("pt0",b),a?w(1):o.serviceWorker?o.serviceWorker.register(c+(s.swPath||"partytown-sw.js"),{scope:c}).then(function(t){t.active?w():t.installing&&t.installing.addEventListener("statechange",function(t){"activated"==t.target.state&&w()})},console.error):h())))}function w(e){p=r.createElement(e?"script":"iframe"),t._pttab=Date.now(),e||(p.style.display="block",p.style.width="0",p.style.height="0",p.style.border="0",p.style.visibility="hidden",p.setAttribute("aria-hidden",!0)),p.src=c+"partytown-"+(e?"atomics.js?v=0.10.2":"sandbox-sw.html?"+t._pttab),r.querySelector(s.sandboxParent||"body").appendChild(p)}function h(n,o){for(b(),i==t&&(s.forward||[]).map(function(n){const[r]=e(n);delete t[r.split(".")[0]]}),n=0;n<l.length;n++)(o=r.createElement("script")).innerHTML=l[n].innerHTML,o.nonce=s.nonce,r.head.appendChild(o);p&&p.parentNode.removeChild(p)}function b(){clearTimeout(d)}s=t.partytown||{},i==t&&(s.forward||[]).map(function(r){const[o,{preserveBehavior:i}]=e(r);u=t,o.split(".").map(function(e,r,o){var a;u=u[o[r]]=r+1<o.length?u[o[r]]||(a=o[r+1],n.includes(a)?[]:{}):(()=>{let e=null;if(i){const{methodOrProperty:n,thisObject:r}=((t,e)=>{let n=t;for(let t=0;t<e.length-1;t+=1)n=n[e[t]];return{thisObject:n,methodOrProperty:e.length>0?n[e[e.length-1]]:void 0}})(t,o);"function"==typeof n&&(e=(...t)=>n.apply(r,...t))}return function(){let n;return e&&(n=e(arguments)),(t._ptf=t._ptf||[]).push(o,arguments),n}})()})}),"complete"==r.readyState?y():(t.addEventListener("DOMContentLoaded",y),t.addEventListener("load",y))}(window,document,navigator,top,window.crossOriginIsolated),document.addEventListener("astro:before-swap",t=>{let e=document.body.querySelector("iframe[src*='/~partytown/']");t.newDocument.body.append(e)})</script></head><body><a href=#main-content class=skip-link>跳至正文</a><header class=site-header><nav aria-label=主导航 class=site-nav><a href=/ class=brand aria-label=返回博客首页><img alt="YP 标志" decoding=async height=56 loading=lazy src=/assets/yp-logo.Cy2_YaY7_tGRxt.webp width=56 class=brand-logo> <span><strong>Yongjian Peng</strong><small>技术笔记与开发实践</small></span></a><div class=desktop-nav><a href=/posts class="nav-link active" aria-current=page>文章</a><a href=/categories class=nav-link>分类</a><a href=/timeline class=nav-link>时间线</a><a href=/posts/gblog class=nav-link>关于博客</a><a href=/friends class=nav-link>友链</a></div><div class=nav-actions><button aria-label=搜索文章 class=icon-button type=button aria-haspopup=dialog data-search-open><svg aria-hidden=true fill=none height=21 stroke=currentColor stroke-width=1.7 viewBox="0 0 24 24" width=21><circle cx=10.5 cy=10.5 r=6.5></circle><path d="m16 16 4.5 4.5"></path></svg></button><dialog aria-labelledby=search-title class=search-dialog id=site-search><div class=search-heading><h2 id=search-title>搜索文章</h2><form method=dialog><button aria-label=关闭搜索 class=icon-button>×</button></form></div><label class=search-label for=search-input>在标题、摘要和标签中查找</label><div class=search-field><input autocomplete=off id=search-input placeholder="输入关键词，如 Astro、开发工具…" type=search><button type=button data-search-clear>清空</button></div><p class=search-status aria-live=polite data-search-status>共 7 篇文章</p><ul class=search-results><li data-search-url=/posts/rk3588-vpn/ ><a href=/posts/rk3588-vpn/ ><strong>RK3588搭建 VPN</strong><span>基于 Windows VPS 与 SSH 反向隧道，为没有公网 IP 的 RK3588 设备建立远程维护通道，记录密钥配置、autossh、systemd 自动上线、多设备接入与排障过程。</span><small>RK3588 · VPN · SSH · 反向隧道 · Windows VPS · Linux · autossh · 远程运维</small></a></li><li data-search-url=/posts/rg200u-5g-debug/ ><a href=/posts/rg200u-5g-debug/ ><strong>RG200U 5G 模块调试</strong><span>记录移远 RG200U-CN 在 RK3588 Ubuntu 平台上的 ECM 联网调试，涵盖硬件识别、AT 状态检查、NetworkManager 自动连接、DNS 配置与重启验收。</span><small>RG200U-CN · RK3588 · 5G · ECM · Linux · NetworkManager · 调试</small></a></li><li data-search-url=/posts/why-astro/ ><a href=/posts/why-astro/ ><strong>为什么选择 Astro？</strong><span>Astro 是面向博客、营销页面和电商等内容型网站的 Web 框架。了解它的特性与设计原则，为下一个网站选择合适的工具。</span><small>Astro</small></a></li><li data-search-url=/posts/gblog/ ><a href=/posts/gblog/ ><strong>Gblog：基于 Astro 的简洁博客模板</strong><span>Gblog 是一款基于 Astro 的博客模板，让你专注于内容，也能轻松搭建简洁、美观的个人博客。</span><small>Gblog · Astro · Godruoyi</small></a></li><li data-search-url=/posts/gpt4o/ ><a href=/posts/gpt4o/ ><strong>GPT-4o：让 AI 交互更自然</strong><span>从向更多人开放强大的 AI 工具，到更自然的语音与视频交互，Sam Altman 分享了 GPT-4o 发布时的思考。</span><small>GPT · OpenAI</small></a></li><li data-search-url=/posts/why-laravel/ ><a href=/posts/why-laravel/ ><strong>为什么选择 Laravel？</strong><span>Laravel 是一个语法清晰、优雅的 Web 应用框架，为应用开发提供完整的基础结构，让你专注于实现业务。</span><small>Laravel</small></a></li><li data-search-url=/posts/markdown/ ><a href=/posts/markdown/ ><strong>Markdown 排版与代码示例</strong><span>通过标题、段落、引用、列表、表格和代码示例，了解技术文章中常用的 Markdown 排版方式。</span><small>Markdown · 博客 · Astro</small></a></li></ul><p class=search-empty data-search-empty hidden>没有找到相关文章，试试其他关键词。</p><p class=search-hint>按 Esc 关闭 · 点击文章开始阅读</p><script type=application/json id=search-data>[{"title":"RK3588搭建 VPN","description":"基于 Windows VPS 与 SSH 反向隧道，为没有公网 IP 的 RK3588 设备建立远程维护通道，记录密钥配置、autossh、systemd 自动上线、多设备接入与排障过程。","tags":["RK3588","VPN","SSH","反向隧道","Windows VPS","Linux","autossh","远程运维"],"url":"/posts/rk3588-vpn/"},{"title":"RG200U 5G 模块调试","description":"记录移远 RG200U-CN 在 RK3588 Ubuntu 平台上的 ECM 联网调试，涵盖硬件识别、AT 状态检查、NetworkManager 自动连接、DNS 配置与重启验收。","tags":["RG200U-CN","RK3588","5G","ECM","Linux","NetworkManager","调试"],"url":"/posts/rg200u-5g-debug/"},{"title":"为什么选择 Astro？","description":"Astro 是面向博客、营销页面和电商等内容型网站的 Web 框架。了解它的特性与设计原则，为下一个网站选择合适的工具。","tags":["Astro"],"url":"/posts/why-astro/"},{"title":"Gblog：基于 Astro 的简洁博客模板","description":"Gblog 是一款基于 Astro 的博客模板，让你专注于内容，也能轻松搭建简洁、美观的个人博客。","tags":["Gblog","Astro","Godruoyi"],"url":"/posts/gblog/"},{"title":"GPT-4o：让 AI 交互更自然","description":"从向更多人开放强大的 AI 工具，到更自然的语音与视频交互，Sam Altman 分享了 GPT-4o 发布时的思考。","tags":["GPT","OpenAI"],"url":"/posts/gpt4o/"},{"title":"为什么选择 Laravel？","description":"Laravel 是一个语法清晰、优雅的 Web 应用框架，为应用开发提供完整的基础结构，让你专注于实现业务。","tags":["Laravel"],"url":"/posts/why-laravel/"},{"title":"Markdown 排版与代码示例","description":"通过标题、段落、引用、列表、表格和代码示例，了解技术文章中常用的 Markdown 排版方式。","tags":["Markdown","博客","Astro"],"url":"/posts/markdown/"}]</script></dialog><button aria-label=切换深色主题 class="icon-button theme-toggle" type=button aria-pressed=false data-theme-toggle><svg aria-hidden=true fill=none height=21 stroke=currentColor stroke-width=1.7 viewBox="0 0 24 24" width=21><g class=theme-sun><circle cx=12 cy=12 r=4></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></g><path d="M20.5 14.5A9 9 0 0 1 9.5 3.5a9 9 0 1 0 11 11Z" class=theme-moon></path></svg></button><details class=mobile-nav><summary aria-label=展开导航菜单 class=icon-button><svg aria-hidden=true fill=none height=22 stroke=currentColor stroke-width=1.6 viewBox="0 0 24 24" width=22><path d="M4 6h16M4 12h16M4 18h16"></path></svg></summary><div class=mobile-nav-links><a href=/posts class="nav-link active" aria-current=page>文章</a><a href=/categories class=nav-link>分类</a><a href=/timeline class=nav-link>时间线</a><a href=/posts/gblog class=nav-link>关于博客</a><a href=/friends class=nav-link>友链</a></div></details></div></nav></header><main id=main-content><section class=post-hero><img alt="RK3588搭建 VPN" decoding=async height=941 loading=eager src=/assets/rk3588-remote-maintenance-cover.BaznMIi5_Z1M2NoD.webp width=1672 class=hero-background fetchpriority=high><div class=hero-shade></div><div class=container><p class="handwritten hero-kicker"><a href=/categories/embedded/ >嵌入式与通信</a> · 技术与实践</p><h1>RK3588搭建 VPN</h1><p class=post-description>基于 Windows VPS 与 SSH 反向隧道，为没有公网 IP 的 RK3588 设备建立远程维护通道，记录密钥配置、autossh、systemd 自动上线、多设备接入与排障过程。</p><div class=author-inline><img alt="YP 标志" decoding=async height=56 loading=lazy src=/assets/yp-logo.Cy2_YaY7_tGRxt.webp width=56><span><strong>Yongjian Peng</strong><small><time datetime=2026-10-13T16:00:00.000Z>2026年10月14日</time> · 约 26 分钟阅读</small></span></div></div></section><div class="container post-layout"><div class=post-main><article class=post-body><p>工业现场的 RK3588 通过 4G SIM 卡联网时，通常无法从管理电脑直接发起 SSH 连接。原始教程用一台有公网地址的 Windows VPS 接收设备主动建立的反向隧道，最终通过 <code>ssh rk3588-001</code> 进入设备。</p><p>本文沿用“搭建 VPN”的标题，具体实现是 <strong>SSH 反向 TCP 隧道与跳板访问</strong>，提供设备 SSH 的远程维护入口。原资料没有配置虚拟网卡、全网段互通或全流量 VPN；需要访问其他服务时，应另行规划转发和授权。</p><blockquote><p>本文整理于 2026年10月15日，原始截图日期为 2026年10月14日。内容来自提供的教程和截图，没有重新登录 VPS 或设备进行实机验证。下文补充的命令是推荐检查步骤，重启上线、断线重连及长期稳定性仍需在自己的环境验收。</p></blockquote><h2 id=1-目标环境与替换参数>1. 目标、环境与替换参数</h2><table><thead><tr><th>角色</th><th>本文示例</th><th>作用</th></tr></thead><tbody><tr><td>管理电脑</td><td>Windows PowerShell / OpenSSH 客户端</td><td>登录 VPS，并通过跳板访问设备</td></tr><tr><td>公网中转服务器</td><td>Windows VPS，SSH 端口 22</td><td>接收设备连接，监听反向转发端口</td></tr><tr><td>现场设备</td><td>RK3588，Ubuntu 22.04，4G SIM</td><td>主动建立 SSH 反向隧道</td></tr><tr><td>设备账号</td><td><code>dover</code></td><td>RK3588 登录用户及 systemd 服务用户</td></tr><tr><td>VPS 示例账号</td><td><code>administrator</code></td><td>原稿使用的 Windows 管理员账号</td></tr></tbody></table><p>正文中的 <code>VPS_PUBLIC_IP</code> 是<strong>必须替换的占位主机名</strong>，不是 Shell 自动展开的变量。把它替换为自己的 VPS IP 或域名；<code>administrator</code>、<code>dover</code>、密钥路径和设备编号也要核对。附录中的 <code>121.5.44.210</code> 来自原稿，仅供对照，不能当作公共测试服务器。</p><p>管理员账号沿用原教程，生产环境可进一步按设备拆分专用账户及转发权限。本文的默认前提是 VPS 和设备均为自己有权维护的机器，且设备已经能够联网。</p><h2 id=2-连接架构与端口规划>2. 连接架构与端口规划</h2><p><img alt="RK3588 通过 Windows VPS 和 SSH 反向隧道进行单设备与多设备远程维护的方案图" decoding=async height=869 loading=lazy src=/assets/rk3588-remote-maintenance-overview.Bcfi-UKS_Z1ROCPO.webp width=1810></p><p><em>方案图由提供的主题插画整理，中文化说明并移除无关品牌；它展示连接思路，不代表实时设备状态。</em></p><figure data-rehype-pretty-code-figure=""><pre data-language=text data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=text data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span>RK3588-001 --主动 SSH--> Windows VPS:22</span></span>
+<span data-line=""><span>    本机 127.0.0.1:22 &#x3C;--反向隧道-- VPS 127.0.0.1:22001</span></span>
+<span data-line=""> </span>
+<span data-line=""><span>管理电脑 --SSH 跳板--> Windows VPS --连接回环 22001--> RK3588-001</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="RK3588-001 --主动 SSH--> Windows VPS:22
+    本机 127.0.0.1:22 <--反向隧道-- VPS 127.0.0.1:22001
+
+管理电脑 --SSH 跳板--> Windows VPS --连接回环 22001--> RK3588-001" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><table><thead><tr><th>设备</th><th>VPS 回环监听</th><th>隧道最终目标</th></tr></thead><tbody><tr><td>RK3588-001</td><td><code>127.0.0.1:22001</code></td><td>001 本机 <code>127.0.0.1:22</code></td></tr><tr><td>RK3588-002</td><td><code>127.0.0.1:22002</code></td><td>002 本机 <code>127.0.0.1:22</code></td></tr><tr><td>RK3588-003</td><td><code>127.0.0.1:22003</code></td><td>003 本机 <code>127.0.0.1:22</code>，扩展示例</td></tr></tbody></table><p>设备通过自己的蜂窝网络发起出站 SSH，不要求 SIM 获得可供外部访问的公网 IP。管理电脑先认证 VPS，再认证目标 RK3588；两个认证过程分别检查各自的账户和主机密钥。</p><h2 id=3-windows-vps安装与配置-openssh>3. Windows VPS：安装与配置 OpenSSH</h2><h3 id=安装服务并检查入口>安装服务并检查入口</h3><p>以下命令在 <strong>Windows VPS 的管理员 PowerShell</strong> 中执行。已安装时先检查状态，无需重复安装：</p><figure data-rehype-pretty-code-figure=""><pre data-language=powershell data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=powershell data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Get-WindowsCapability</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> -</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Online </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Name </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>'OpenSSH.Server*'</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Add-WindowsCapability</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> -</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Online </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Name OpenSSH.Server~~~~</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>0.0</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>.</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>1.0</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Start-Service</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> sshd</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Set-Service</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> sshd </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>StartupType Automatic</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Get-Service</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> sshd</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="Get-WindowsCapability -Online -Name &#x27;OpenSSH.Server*&#x27;
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+Start-Service sshd
+Set-Service sshd -StartupType Automatic
+Get-Service sshd" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>同时核对 Windows 防火墙的 <code>OpenSSH-Server-In-TCP</code> 规则和云安全组：本方案需要允许合法管理端与设备访问 VPS 的 TCP 22。若规则不存在，参照当前 Windows 版本的安装流程建立规则，再按实际来源收敛访问范围。<a href=https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse>Windows 安装与防火墙说明</a>。</p><p><strong>不需要将 22001、22002、22003 开放为公网入站端口。</strong> 它们只供 VPS 本机和已认证的 SSH 跳板连接使用。</p><h3 id=配置转发与检查语法>配置转发与检查语法</h3><p>先备份并编辑 <code>C:\ProgramData\ssh\sshd_config</code>。下面是全局设置；放在第一个 <code>Match</code> 段之前，修改现有对应项，避免只追加到不适用的账号匹配段：</p><figure data-rehype-pretty-code-figure=""><pre data-language=conf data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=conf data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span>PubkeyAuthentication yes</span></span>
+<span data-line=""><span>AllowTcpForwarding yes</span></span>
+<span data-line=""><span>GatewayPorts no</span></span>
+<span data-line=""><span>AllowAgentForwarding no</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="PubkeyAuthentication yes
+AllowTcpForwarding yes
+GatewayPorts no
+AllowAgentForwarding no" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>主线使用回环监听。原稿的 <code>GatewayPorts yes</code> 会让远程转发采用通配地址监听，与图中的 localhost 访问范围不同；这里改为 <code>no</code>。保留 TCP 转发支持设备的反向连接和管理端跳板，不启用代理转发。<a href=https://man.openbsd.org/sshd_config>OpenSSH 服务端配置</a>。</p><p>在 VPS 检查配置无误后重启服务；若 OpenSSH 安装路径不同，先定位 <code>sshd.exe</code>：</p><figure data-rehype-pretty-code-figure=""><pre data-language=powershell data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=powershell data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>&#x26;</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> "</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>WINDIR</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\System32\OpenSSH\sshd.exe"</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> -</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>t </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-f</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> "</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ProgramData</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\ssh\sshd_config"</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Restart-Service</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> sshd</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="&#x26; &#x22;$env:WINDIR\System32\OpenSSH\sshd.exe&#x22; -t -f &#x22;$env:ProgramData\ssh\sshd_config&#x22;
+Restart-Service sshd" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>语法检查应没有错误输出。重启前保留 VPS 控制台或另一条管理通道，避免修改错误后失去入口；先验证新会话，再关闭旧会话。</p><h2 id=4-密钥放在哪里三条认证关系>4. 密钥放在哪里：三条认证关系</h2><table><thead><tr><th>发起端 → 登录端</th><th>公钥应放的位置</th><th>私钥保留位置</th></tr></thead><tbody><tr><td>管理电脑 → VPS</td><td>VPS 对应 Windows 账号的授权文件</td><td>管理电脑</td></tr><tr><td>RK3588 → VPS</td><td>VPS 授权文件，追加该设备的公钥</td><td>对应 RK3588</td></tr><tr><td>管理电脑 → RK3588</td><td>RK3588 用户的 <code>~/.ssh/authorized_keys</code></td><td>管理电脑</td></tr></tbody></table><p><strong>传输的是 <code>.pub</code> 公钥，不能把私钥复制到 VPS。</strong> 两台 RK3588 分别生成自己的设备密钥；管理电脑访问设备可以先使用设备密码验证，再部署管理电脑公钥。</p><h3 id=管理电脑生成密钥>管理电脑生成密钥</h3><p>先检查已有文件。存在时复用合适的密钥或换一个名称，不能在覆盖提示中直接确认：</p><figure data-rehype-pretty-code-figure=""><pre data-language=powershell data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=powershell data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Test-Path</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> "</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>USERPROFILE</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\.ssh\id_ed25519"</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>keygen </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>t ed25519</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Get-Content</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> "</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>USERPROFILE</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\.ssh\id_ed25519.pub"</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="Test-Path &#x22;$env:USERPROFILE\.ssh\id_ed25519&#x22;
+ssh-keygen -t ed25519
+Get-Content &#x22;$env:USERPROFILE\.ssh\id_ed25519.pub&#x22;" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>Linux 管理端对应的公钥查看命令是 <code>cat ~/.ssh/id_ed25519.pub</code>。交互管理密钥可以设置口令，使用时由操作者或 ssh-agent 解锁。</p><p><img alt="原始 Windows PowerShell 生成 Ed25519 密钥的过程，个人用户名和主机标识已遮蔽" decoding=async height=998 loading=lazy src=/assets/windows-ed25519-key-generation.CKh9Rr5w_ZQ5cHT.webp width=1575></p><p><em>2026年10月14日原始密钥生成截图；仅展示生成过程，不包含私钥文件内容。个人标识已处理，终端输出保留原义。</em></p><h3 id=vps-的管理员授权文件>VPS 的管理员授权文件</h3><p>默认 Windows OpenSSH 管理员匹配规则使用 <code>C:\ProgramData\ssh\administrators_authorized_keys</code>；普通用户通常使用其用户目录下的 <code>.ssh\authorized_keys</code>。以实际 <code>sshd_config</code> 为准，管理员公钥不能仅按原稿 002 部分放入用户目录。<a href=https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement>微软密钥认证说明</a>。</p><p>在 VPS 管理员 PowerShell 中<strong>追加</strong>一行公钥，然后检查 ACL。下面的 SID 避免本地化系统的组名差异：</p><figure data-rehype-pretty-code-figure=""><pre data-language=powershell data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=powershell data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$publicKey </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>=</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> '粘贴完整的 ssh-ed25519 公钥行'</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Add-Content</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> -</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>LiteralPath </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>"</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ProgramData</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\ssh\administrators_authorized_keys"</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> -</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Value $publicKey </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Encoding ascii</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>icacls </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>"</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ProgramData</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\ssh\administrators_authorized_keys"</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> /</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>inheritance:r</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>icacls </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>"</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ProgramData</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\ssh\administrators_authorized_keys"</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> /</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>grant:r </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>"*S-1-5-18:F"</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> "*S-1-5-32-544:F"</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>icacls </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>"</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ProgramData</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\ssh\administrators_authorized_keys"</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="$publicKey = &#x27;粘贴完整的 ssh-ed25519 公钥行&#x27;
+Add-Content -LiteralPath &#x22;$env:ProgramData\ssh\administrators_authorized_keys&#x22; -Value $publicKey -Encoding ascii
+icacls &#x22;$env:ProgramData\ssh\administrators_authorized_keys&#x22; /inheritance:r
+icacls &#x22;$env:ProgramData\ssh\administrators_authorized_keys&#x22; /grant:r &#x22;*S-1-5-18:F&#x22; &#x22;*S-1-5-32-544:F&#x22;
+icacls &#x22;$env:ProgramData\ssh\administrators_authorized_keys&#x22;" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>替换 <code>$publicKey</code> 后再执行。最终只应由 SYSTEM 和 Administrators 访问；若原文件已有其他显式授权，先检查并按需撤销，不能认为去掉继承就会自动清除它们。每个公钥占一行，追加前检查是否已经存在。</p><p>管理电脑测试 VPS 登录并核对主机指纹：</p><figure data-rehype-pretty-code-figure=""><pre data-language=powershell data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=powershell data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>i </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>"</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>$</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>env:</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>USERPROFILE</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>\.ssh\id_ed25519"</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> administrator@VPS_PUBLIC_IP</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="ssh -i &#x22;$env:USERPROFILE\.ssh\id_ed25519&#x22; administrator@VPS_PUBLIC_IP" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>首次连接时通过可信的 VPS 控制台核对主机公钥指纹，再接受保存；不要仅为跳过提示而关闭主机验证。</p><h2 id=5-rk3588-001先手动打通反向隧道>5. RK3588-001：先手动打通反向隧道</h2><p>以下在 <strong>001 的 dover 用户 Shell</strong> 中执行。先检查本机 SSH 服务和网络：</p><figure data-rehype-pretty-code-figure=""><pre data-language=bash data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=bash data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> apt</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> update</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> apt</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> install</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> openssh-server</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> enable</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> --now</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ssh</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> is-active</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ssh</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ss</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -lnt</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> |</span><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50> grep</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ':22'</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ip</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> route</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="sudo apt update
+sudo apt install autossh openssh-server
+sudo systemctl enable --now ssh
+systemctl is-active ssh
+ss -lnt | grep &#x27;:22&#x27;
+ip route" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>生成独立的 VPS 连接密钥；已存在时检查并复用，不能覆盖：</p><figure data-rehype-pretty-code-figure=""><pre data-language=bash data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=bash data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>test</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -f</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/id_ed25519_vps</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> &#x26;&#x26; </span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>echo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> '密钥已存在，请先检查'</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh-keygen</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -t</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ed25519</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -f</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/id_ed25519_vps</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>cat</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/id_ed25519_vps.pub</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="test -f ~/.ssh/id_ed25519_vps &#x26;&#x26; echo &#x27;密钥已存在，请先检查&#x27;
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_vps
+cat ~/.ssh/id_ed25519_vps.pub" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>把设备公钥追加到第 4 节的 VPS 授权文件。设备后台密钥必须有可用的无人值守解锁方式；本例没有为 systemd 配置 ssh-agent，若设置了密钥口令，应先解决服务解锁问题，不能指望后台弹出输入框。使用无口令的专用设备密钥时，要保护本机文件权限，并在 VPS 收敛对应账户的权限。</p><p>仍以 dover 身份先手动登录一次，核对并保存 VPS 主机指纹，然后确认非交互认证成功：</p><figure data-rehype-pretty-code-figure=""><pre data-language=bash data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=bash data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -i</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/id_ed25519_vps</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> administrator@VPS_PUBLIC_IP</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> BatchMode=yes</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> StrictHostKeyChecking=yes</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -i</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/id_ed25519_vps</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> administrator@VPS_PUBLIC_IP</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> hostname</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="ssh -i ~/.ssh/id_ed25519_vps administrator@VPS_PUBLIC_IP
+ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -i ~/.ssh/id_ed25519_vps administrator@VPS_PUBLIC_IP hostname" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p><code>hostname</code> 应返回 VPS 名称，不应要求密码或首次指纹确认。这里认证的是 VPS，尚未验证 RK3588 的转发端口。</p><p>手动建立 001 隧道：</p><figure data-rehype-pretty-code-figure=""><pre data-language=bash data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=bash data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>autossh</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -M</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> 0</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -N</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -i</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> /home/dover/.ssh/id_ed25519_vps</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> IdentitiesOnly=yes</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> BatchMode=yes</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> StrictHostKeyChecking=yes</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ExitOnForwardFailure=yes</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ServerAliveInterval=</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>30</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ServerAliveCountMax=</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>3</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -o</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ConnectTimeout=</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>30</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>  -R</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> 127.0.0.1:22001:127.0.0.1:22</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>  administrator@VPS_PUBLIC_IP</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="autossh -M 0 -N \
+  -i /home/dover/.ssh/id_ed25519_vps \
+  -o IdentitiesOnly=yes \
+  -o BatchMode=yes \
+  -o StrictHostKeyChecking=yes \
+  -o ExitOnForwardFailure=yes \
+  -o ServerAliveInterval=30 \
+  -o ServerAliveCountMax=3 \
+  -o ConnectTimeout=30 \
+  -R 127.0.0.1:22001:127.0.0.1:22 \
+  administrator@VPS_PUBLIC_IP" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p><code>-N</code> 只建立转发，不启动 VPS 交互 Shell；<code>-R</code> 左侧是 VPS 监听地址，右侧是设备侧目标。<code>-M 0</code> 关闭 autossh 独立监测端口，本例使用 SSH 保活；正常连接时窗口可能持续运行而没有输出。<code>ExitOnForwardFailure</code> 检查转发建立失败，不能代替目标服务检查。<a href=https://man.openbsd.org/ssh>SSH 参数</a>、<a href=https://www.harding.motd.ca/autossh/ >autossh 项目说明</a>。</p><p>在 <strong>VPS PowerShell</strong> 中检查监听，再测试进入设备：</p><figure data-rehype-pretty-code-figure=""><pre data-language=powershell data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=powershell data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Get-NetTCPConnection</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> -</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>State Listen </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>LocalPort </span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>22001</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> |</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> Select-Object</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> LocalAddress</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>,</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>LocalPort</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>,</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>OwningProcess</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh dover@127.0.0.1 </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>p </span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>22001</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="Get-NetTCPConnection -State Listen -LocalPort 22001 | Select-Object LocalAddress,LocalPort,OwningProcess
+ssh dover@127.0.0.1 -p 22001" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>监听应限定为 <code>127.0.0.1</code>，随后在设备 Shell 中用 <code>hostname</code>、<code>whoami</code>、<code>uname -a</code> 确认目标身份。VPS 到设备的临时测试可能需要设备密码，不能把“VPS 登录免密”误认为“设备登录也已免密”。</p><p>手动检查完成后，用 Ctrl+C 停止前台 autossh，再启动下一节服务，避免同一端口被两个进程占用。</p><h2 id=6-systemd开机自动上线>6. systemd：开机自动上线</h2><p>确认 <code>/home/dover</code> 是实际用户目录，并以同一用户完成上一节的认证。以 sudo 编辑 <code>/etc/systemd/system/autossh-rk3588.service</code>，使用下面的推荐配置；将 <code>VPS_PUBLIC_IP</code> 替换后再启动：</p><figure data-rehype-pretty-code-figure=""><pre data-language=ini data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=ini data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>[Unit]</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Description</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=RK3588 SSH reverse tunnel to Windows VPS</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>After</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=network-online.target ssh.service</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Wants</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=network-online.target ssh.service</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>[Service]</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Type</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=simple</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>User</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=dover</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Environment</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>"AUTOSSH_GATETIME=0"</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ExecStartPre</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=/bin/bash -c </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>'until ip route | grep default; do sleep 5; done'</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ExecStart</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=/usr/bin/autossh -M 0 -N \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -i /home/dover/.ssh/id_ed25519_vps \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>IdentitiesOnly</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=yes \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>BatchMode</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=yes \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>StrictHostKeyChecking</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=yes \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ExitOnForwardFailure</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=yes \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ServerAliveInterval</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=30 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ServerAliveCountMax</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=3 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ConnectTimeout</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=30 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -R 127.0.0.1:22001:127.0.0.1:22 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    administrator@VPS_PUBLIC_IP</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Restart</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=always</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>RestartSec</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=15</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>[Install]</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>WantedBy</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=multi-user.target</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="[Unit]
+Description=RK3588 SSH reverse tunnel to Windows VPS
+After=network-online.target ssh.service
+Wants=network-online.target ssh.service
+
+[Service]
+Type=simple
+User=dover
+Environment=&#x22;AUTOSSH_GATETIME=0&#x22;
+ExecStartPre=/bin/bash -c &#x27;until ip route | grep default; do sleep 5; done&#x27;
+ExecStart=/usr/bin/autossh -M 0 -N \
+    -i /home/dover/.ssh/id_ed25519_vps \
+    -o IdentitiesOnly=yes \
+    -o BatchMode=yes \
+    -o StrictHostKeyChecking=yes \
+    -o ExitOnForwardFailure=yes \
+    -o ServerAliveInterval=30 \
+    -o ServerAliveCountMax=3 \
+    -o ConnectTimeout=30 \
+    -R 127.0.0.1:22001:127.0.0.1:22 \
+    administrator@VPS_PUBLIC_IP
+Restart=always
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>保留原稿的网络依赖、默认路由等待和重启间隔。<code>network-online.target</code> 的效果依赖网络管理器的等待服务；默认路由存在也不代表蜂窝注册、DNS 或 VPS 连接已经可用。启动等待还受 systemd 超时控制，因此要结合实际联网时序查看日志。</p><p>在 RK3588 检查服务配置、启动并观察：</p><figure data-rehype-pretty-code-figure=""><pre data-language=bash data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=bash data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemd-analyze</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> verify</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> /etc/systemd/system/autossh-rk3588.service</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> daemon-reload</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> enable</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> --now</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588.service</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> status</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588.service</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> --no-pager</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>journalctl</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -u</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588.service</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -n</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> 100</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> --no-pager</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="sudo systemd-analyze verify /etc/systemd/system/autossh-rk3588.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now autossh-rk3588.service
+systemctl status autossh-rk3588.service --no-pager
+journalctl -u autossh-rk3588.service -n 100 --no-pager" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>服务应保持运行，并在 VPS 重新出现 22001 监听。最后仍需实际登录到设备；<code>active</code> 只是进程状态，不是完整的远程维护验收结果。</p><h2 id=7-rk3588-002新增一台设备>7. RK3588-002：新增一台设备</h2><p>在 <strong>002 上</strong>执行第 5 节的安装和密钥步骤，生成自己的 <code>id_ed25519_vps</code>，把它的公钥追加到 VPS；不要复制 001 的私钥。先完成该设备用户的首次主机指纹确认与非交互认证。</p><p>002 使用相同服务文件名没有问题，因为文件位于另一台机器；在它自己的服务配置中将反向端口改为：</p><figure data-rehype-pretty-code-figure=""><pre data-language=text data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=text data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span>-R 127.0.0.1:22002:127.0.0.1:22</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="-R 127.0.0.1:22002:127.0.0.1:22" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>用户和密钥目录不同也要一起修改。先手动测试，再启用服务：</p><figure data-rehype-pretty-code-figure=""><pre data-language=bash data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=bash data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> daemon-reload</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> enable</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> --now</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588.service</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> status</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588.service</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> --no-pager</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="sudo systemctl daemon-reload
+sudo systemctl enable --now autossh-rk3588.service
+systemctl status autossh-rk3588.service --no-pager" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>如果是在已经运行的服务上修改端口，还要执行 <code>sudo systemctl restart autossh-rk3588.service</code> 才会应用新参数。</p><p>在 <strong>Windows VPS</strong> 测试 002：</p><figure data-rehype-pretty-code-figure=""><pre data-language=powershell data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=powershell data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Get-NetTCPConnection</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067> -</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>State Listen </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>LocalPort </span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>22002</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh dover@127.0.0.1 </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>p </span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>22002</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="Get-NetTCPConnection -State Listen -LocalPort 22002
+ssh dover@127.0.0.1 -p 22002" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>用设备身份确认命令核对进入的是 002。接入 003 时依此分配 22003；原稿中的在线/离线表是管理示例，不是本文提供的实时监控。</p><h2 id=8-管理电脑一个别名进入目标设备>8. 管理电脑：一个别名进入目标设备</h2><p>原稿的 <code>RemoteCommand ssh rk3588-001</code> 会让 VPS 再执行这个别名，但没有给出 VPS 侧的同名配置。这里把跳板关系完整放在<strong>管理电脑</strong>的 SSH 配置中，不依赖 VPS 的 Shell 别名或私钥。</p><p>Windows 文件为 <code>$env:USERPROFILE\.ssh\config</code>；Linux/macOS 对应 <code>~/.ssh/config</code>。保留已有配置，将下面的具体 Host 段放在通用 <code>Host *</code> 默认项之前；已有同名段则合并。OpenSSH 多数选项采用首次取得的值，直接追加在默认项后可能沿用错误的用户、端口或代理。替换 VPS 地址与账号：</p><figure data-rehype-pretty-code-figure=""><pre data-language=sshconfig data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=sshconfig data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span>Host rk3588-vps</span></span>
+<span data-line=""><span>    HostName VPS_PUBLIC_IP</span></span>
+<span data-line=""><span>    User administrator</span></span>
+<span data-line=""><span>    Port 22</span></span>
+<span data-line=""><span>    IdentityFile ~/.ssh/id_ed25519</span></span>
+<span data-line=""><span>    IdentitiesOnly yes</span></span>
+<span data-line=""><span>    ForwardAgent no</span></span>
+<span data-line=""> </span>
+<span data-line=""><span>Host rk3588-001</span></span>
+<span data-line=""><span>    HostName 127.0.0.1</span></span>
+<span data-line=""><span>    User dover</span></span>
+<span data-line=""><span>    Port 22001</span></span>
+<span data-line=""><span>    ProxyJump rk3588-vps</span></span>
+<span data-line=""><span>    IdentityFile ~/.ssh/id_ed25519</span></span>
+<span data-line=""><span>    IdentitiesOnly yes</span></span>
+<span data-line=""><span>    HostKeyAlias rk3588-001</span></span>
+<span data-line=""><span>    ForwardAgent no</span></span>
+<span data-line=""><span>    ForwardX11 no</span></span>
+<span data-line=""> </span>
+<span data-line=""><span>Host rk3588-002</span></span>
+<span data-line=""><span>    HostName 127.0.0.1</span></span>
+<span data-line=""><span>    User dover</span></span>
+<span data-line=""><span>    Port 22002</span></span>
+<span data-line=""><span>    ProxyJump rk3588-vps</span></span>
+<span data-line=""><span>    IdentityFile ~/.ssh/id_ed25519</span></span>
+<span data-line=""><span>    IdentitiesOnly yes</span></span>
+<span data-line=""><span>    HostKeyAlias rk3588-002</span></span>
+<span data-line=""><span>    ForwardAgent no</span></span>
+<span data-line=""><span>    ForwardX11 no</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="Host rk3588-vps
+    HostName VPS_PUBLIC_IP
+    User administrator
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+    ForwardAgent no
+
+Host rk3588-001
+    HostName 127.0.0.1
+    User dover
+    Port 22001
+    ProxyJump rk3588-vps
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+    HostKeyAlias rk3588-001
+    ForwardAgent no
+    ForwardX11 no
+
+Host rk3588-002
+    HostName 127.0.0.1
+    User dover
+    Port 22002
+    ProxyJump rk3588-vps
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+    HostKeyAlias rk3588-002
+    ForwardAgent no
+    ForwardX11 no" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>这里的 <code>127.0.0.1</code> 由 VPS 跳板发起访问，不是管理电脑自己的回环端口。首次连接要分别核对 VPS 和 RK3588 主机指纹；<code>HostKeyAlias</code> 让设备主机密钥按编号记录。<a href=https://man.openbsd.org/ssh_config>OpenSSH 客户端配置</a>。</p><p>在管理电脑检查配置解析，核对 <code>user</code>、<code>port</code>、<code>proxyjump</code> 和身份文件符合上面的目标，再登录：</p><figure data-rehype-pretty-code-figure=""><pre data-language=powershell data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=powershell data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>G rk3588</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh rk3588</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh rk3588</span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>002</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="ssh -G rk3588-001
+ssh rk3588-001
+ssh rk3588-002" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>初次登录设备可以使用 dover 密码。需要设备免密时，将<strong>管理电脑公钥</strong>追加到对应 RK3588 的 <code>/home/dover/.ssh/authorized_keys</code>，确保目录属主为 dover、目录权限 700、文件权限 600。不要把设备连接 VPS 的公钥误当成管理电脑公钥。</p><figure data-rehype-pretty-code-figure=""><pre data-language=bash data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=bash data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>mkdir</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -p</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>chmod</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> 700</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>touch</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/authorized_keys</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>chmod</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> 600</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/authorized_keys</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+touch ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>这组权限命令在 <strong>目标设备的 dover 用户</strong>下执行；然后用编辑器追加完整的管理电脑公钥行，不清空已有内容。完成后从管理电脑重新测试，保留原会话直到新连接成功。</p><h2 id=9-原始调试记录与故障判读>9. 原始调试记录与故障判读</h2><p><img alt="2026年10月14日原始 Xshell 连接记录，显示 X11 转发警告和 Ubuntu 设备会话" decoding=async height=590 loading=lazy src=/assets/rk3588-ssh-remote-session.D9OweWUk_1KKRPa.webp width=848></p><p><em>原始截图显示已建立连接并进入 Ubuntu Shell：Ubuntu 22.04.3 LTS、Linux 5.10.226 aarch64，最近登录来源为 127.0.0.1。截图不足以证明 001/002 全部接入、systemd 重启恢复或长期稳定性；Xshell 的具体中间连接设置也没有在图中完整展示。</em></p><p>图中的 <code>The remote SSH server rejected X11 forwarding request</code> 表示 X11 请求被拒；本教程只需要终端维护，已出现 Ubuntu 提示符时可以继续检查设备身份。无需为消除这条警告而启用 X11；原日志还显示系统精简说明与更新失败提示，这些属于目标系统维护事项，不等于 SSH 隧道失败。</p><h3 id=按链路逐段排查>按链路逐段排查</h3><table><thead><tr><th>现象</th><th>检查命令或位置</th><th>判读与处理</th></tr></thead><tbody><tr><td>VPS 22 不通</td><td>管理电脑 <code>Test-NetConnection VPS_PUBLIC_IP -Port 22</code></td><td>核对 VPS 地址、sshd、Windows 防火墙和云安全组；RK3588 的出站链路也要单独检查。</td></tr><tr><td><code>Permission denied (publickey)</code></td><td>发起端 <code>ssh -vvv</code>；VPS 授权文件、ACL、实际 Match 段</td><td>确认使用对应私钥、完整公钥和正确账号；普通用户目录不替代默认管理员授权文件。</td></tr><tr><td>服务中认证失败，手动能登录</td><td>设备 <code>journalctl -u autossh-rk3588.service</code></td><td>对照服务用户、绝对密钥路径、known_hosts 和口令解锁条件。</td></tr><tr><td><code>remote port forwarding failed</code></td><td>VPS <code>Get-NetTCPConnection -State Listen -LocalPort 22001</code></td><td>可能是同端口隧道仍在运行或转发策略拒绝；确认归属，不能直接结束未知进程。</td></tr><tr><td>有监听但登录设备失败</td><td>VPS <code>ssh -vvv dover@127.0.0.1 -p 22001</code>；设备 <code>systemctl status ssh</code></td><td>监听存在不等于设备 SSH 正常；检查设备服务及 dover 的认证。</td></tr><tr><td>名称或跳板无法解析</td><td>管理电脑 <code>ssh -G rk3588-001</code></td><td>检查是否读取正确的 config、Host/Port/ProxyJump 是否正确，是否已替换占位主机名。</td></tr><tr><td>自动上线后断开</td><td>设备 <code>journalctl -u autossh-rk3588.service -f</code></td><td>结合蜂窝网络、路由和 VPS 状态判断；保活与重试参数需要断网场景实机验收。</td></tr></tbody></table><p>开启详细日志时，先隐藏地址、用户名等环境信息再对外分享；不要上传私钥。核对日志中的连接目标与执行机器，避免把 VPS 上的 <code>localhost</code> 与 RK3588 的 <code>localhost</code> 混用。</p><h2 id=10-验收停用与后续扩展>10. 验收、停用与后续扩展</h2><p>逐项记录自己的检查结果：</p><ol><li>管理电脑能认证 VPS；001、002 各自能以服务用户非交互认证 VPS。</li><li>VPS 只在回环地址监听 22001 / 22002；从这两个端口分别进入正确设备。</li><li>管理电脑的两个别名均可用，设备身份、用户和认证路径正确。</li><li>停止前台 autossh 后，systemd 服务独立建立隧道，没有重复占用端口。</li><li>安排可控重启，确认不用手动启动即可上线；恢复蜂窝网络后检查重连时间与日志。</li><li>长时间运行记录失败次数、恢复时间和网络状态，不以一次成功 Shell 代替稳定性测试。</li></ol><p>这是一份<strong>待执行的验收清单</strong>。原稿记录了通过 VPS 端口进入设备的步骤，提供的截图显示一次 Ubuntu 会话；本文没有补造重启或断网恢复的测试结果。</p><p>在目标 RK3588 停用自动隧道：</p><figure data-rehype-pretty-code-figure=""><pre data-language=bash data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=bash data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> disable</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> --now</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588.service</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="sudo systemctl disable --now autossh-rk3588.service" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure><p>这会关闭依赖该服务的远程连接。先准备本地控制台或其他管理通道；需要撤销访问时，只移除对应设备的授权公钥，不能清空 VPS 上其他设备或管理员的公钥。</p><p>原稿的工业化扩展方向继续保留：MQTT 心跳、设备状态管理、CRM 烤机平台和 Web SSH 入口。它们是后续规划，本篇没有增加这些系统，也没有提供实时在线监控。</p><h2 id=11-来源修正对照与完整原稿>11. 来源、修正对照与完整原稿</h2><p>来源文件为 <code>RK3588_Windows_VPS_SSH_Reverse_Tunnel_Remote_Maintenance_Tutorial.md</code>，配套两张终端截图与一张方案图。原始资料保留在本地 docs 中；博客使用项目内语义命名的资源。</p><table><thead><tr><th>原始记录</th><th>本文主线处理</th></tr></thead><tbody><tr><td><code>GatewayPorts yes</code>、<code>AllowAgentForwarding yes</code></td><td>使用回环监听与关闭代理转发，端口不向公网开放。</td></tr><tr><td>002 公钥写入管理员用户目录</td><td>根据实际管理员 Match 规则使用统一授权文件，普通用户另行区分。</td></tr><tr><td><code>RemoteCommand ssh rk3588-001</code> / <code>rk3588-002</code></td><td>用完整的 ProxyJump 主机配置实现同样的单命令入口。</td></tr><tr><td>前台命令缺少失败退出及明确密钥</td><td>补充身份路径、非交互认证、主机验证和转发建立检查。</td></tr><tr><td>示例表中的在线/离线</td><td>保留为扩展规划，不作为实时监测数据。</td></tr></tbody></table><p>补充说明参考 <a href=https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement>Windows OpenSSH 密钥管理</a>、<a href=https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh-server-configuration>Windows 服务端配置</a>、<a href=https://man.openbsd.org/sshd_config>OpenSSH 服务端</a>、<a href=https://man.openbsd.org/ssh_config>OpenSSH 客户端</a>和 <a href=https://www.harding.motd.ca/autossh/ >autossh</a>。不同 Windows/OpenSSH 版本支持范围应以实际安装为准。</p><p>下面保留完整原文及 26 个原始代码块，方便追溯。它含原环境 IP、原配置和缺少前置定义的别名；<strong>请按上文修正版执行，不把附录整段当作已核验的操作脚本</strong>。</p><details><summary>展开完整原始教程与命令</summary><figure data-rehype-pretty-code-figure=""><pre data-language=markdown data-theme="github-light github-dark-dimmed" tabindex=0><code data-language=markdown data-theme="github-light github-dark-dimmed" style="display: grid;"><span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 基于 Windows VPS + SSH 反向隧道的 RK3588 远程维护平台搭建教程</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>## 1. 项目目标</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>解决工业现场 RK3588 设备：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#E36209;--shiki-dark:#F69D50>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>   使用 4G SIM 卡联网</span></span>
+<span data-line=""><span style=--shiki-light:#E36209;--shiki-dark:#F69D50>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>   无公网 IP</span></span>
+<span data-line=""><span style=--shiki-light:#E36209;--shiki-dark:#F69D50>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>   无法直接 SSH</span></span>
+<span data-line=""><span style=--shiki-light:#E36209;--shiki-dark:#F69D50>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>   需要远程维护</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>最终实现：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> rk3588-001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>直接进入目标设备。</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 2. 总体架构</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    管理员电脑</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>        |</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>        | SSH 22</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>        |</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>        v</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    Windows VPS</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    121.5.44.210</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>        |</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>        | SSH Reverse Tunnel</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>        |</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>        +----------------+</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>                         |</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>                  localhost:22001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>                         |</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>                         v</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>                  RK3588-001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>                  Ubuntu 22.04</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>                  4G SIM</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 3. Windows VPS 配置</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>## 3.1 安装 OpenSSH Server</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Windows VPS 安装：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>OpenSSH Server</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>启动：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` powershell</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Start-Service</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> sshd</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>设置开机启动：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` powershell</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Set-Service</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> sshd </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>StartupType Automatic</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>## 3.2 修改 sshd_config</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>文件：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    C:\ProgramData\ssh\sshd_config</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>增加：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` conf</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>AllowTcpForwarding yes</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>GatewayPorts yes</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>AllowAgentForwarding yes</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>重启：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` powershell</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>Restart-Service</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7> sshd</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 4. 配置 VPS 登录密钥</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>管理员电脑生成：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh-keygen</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -t</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ed25519</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>复制：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>cat</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/id_ed25519.pub</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>添加到：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    C:\ProgramData\ssh\administrators_authorized_keys</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>权限：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` powershell</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>icacls C:\ProgramData\ssh\administrators_authorized_keys </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>/</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>inheritance:r</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>icacls C:\ProgramData\ssh\administrators_authorized_keys </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>/</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>grant SYSTEM:F</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>icacls C:\ProgramData\ssh\administrators_authorized_keys </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>/</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>grant Administrators:F</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>测试：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> administrator@121.5.44.210</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 5. RK3588-001 配置反向 SSH</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>设备生成密钥：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh-keygen</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -t</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ed25519</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>配置 autossh：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    -R 22001:localhost:22</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>表示：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    VPS localhost:22001</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>            |</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>            |</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    RK3588 SSH 22</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>测试：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>RK3588：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>autossh</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>-M</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> 0</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>-N</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>-R</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> 22001:localhost:22</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067> \</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>administrator@121.5.44.210</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>VPS：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` powershell</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh dover@localhost </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>p </span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>22001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 6. RK3588 开机自动上线</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>创建：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    /etc/systemd/system/autossh-rk3588.service</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>内容：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` ini</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>[Unit]</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Description</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=AutoSSH Reverse Tunnel to VPS</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>After</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=network-online.target ssh.service</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Wants</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=network-online.target ssh.service</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>[Service]</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Type</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=simple</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>User</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=dover</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Environment</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>"AUTOSSH_GATETIME=0"</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ExecStartPre</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=/bin/bash -c </span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF>'until ip route | grep default; do sleep 5; done'</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ExecStart</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=/usr/bin/autossh \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>-M 0 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>-N \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>-o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ServerAliveInterval</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=30 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>-o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ServerAliveCountMax</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=3 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>-o </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>ConnectTimeout</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=30 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>-R 22001:localhost:22 \</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>administrator@121.5.44.210</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>Restart</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=always</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>RestartSec</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=15</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>[Install]</span></span>
+<span data-line=""><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>WantedBy</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>=multi-user.target</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>启动：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> daemon-reload</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> enable</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> start</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 新增 RK3588-002 设备接入教程</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>## 1. 端口规划</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>已有：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    RK3588-001</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    VPS:</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    localhost:22001</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>新增：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    RK3588-002</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    VPS:</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    localhost:22002</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>规则：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>  设备         VPS端口</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>  ------------ ---------</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>  RK3588-001   22001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>  RK3588-002   22002</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>  RK3588-003   22003</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 2. RK3588-002 配置</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>安装：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> apt</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> install</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>生成密钥：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh-keygen</span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF> -t</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ed25519</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>复制：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>cat</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> ~/.ssh/id_ed25519.pub</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>添加到 VPS：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    C:\Users\Administrator</span><span style=--shiki-light:#005CC5;--shiki-dark:#F47067>\.</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh\authorized_keys</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 3. 修改反向端口</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>RK3588-001：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>-R</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> 22001:localhost:22</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>RK3588-002：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>-R</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> 22002:localhost:22</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 4. systemd 服务修改</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>复制：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    autossh-rk3588.service</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>修改：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` ini</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>-R 22002:localhost:22</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>重新加载：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> daemon-reload</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> enable</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>sudo</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> systemctl</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> start</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> autossh-rk3588</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 5. VPS测试 RK3588-002</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Windows VPS：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` powershell</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>ssh dover@localhost </span><span style=--shiki-light:#D73A49;--shiki-dark:#F47067>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>p </span><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF>22002</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>成功进入：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    RK3588-002</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 6. 管理电脑 SSH 别名</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>编辑：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    ~/.ssh/config</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>添加：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>## RK3588-001</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` sshconfig</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Host rk3588-001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    HostName 121.5.44.210</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    User administrator</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    RemoteCommand ssh rk3588-001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    RequestTTY yes</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>## RK3588-002</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` sshconfig</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>Host rk3588-002</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    HostName 121.5.44.210</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    User administrator</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    RemoteCommand ssh rk3588-002</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>    RequestTTY yes</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 7. 使用方式</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>设备1：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> rk3588-001</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>设备2：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>``` bash</span></span>
+<span data-line=""><span style=--shiki-light:#6F42C1;--shiki-dark:#F69D50>ssh</span><span style=--shiki-light:#032F62;--shiki-dark:#96D0FF> rk3588-002</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>```</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>------------------------------------------------------------------------</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold># 8. 工业化扩展</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>设备管理：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>  设备编号     SSH端口   状态</span></span>
+<span data-line=""><span style=--shiki-light:#005CC5;--shiki-dark:#6CB6FF;--shiki-light-font-weight:bold;--shiki-dark-font-weight:bold>  ------------ --------- ------</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>  RK3588-001   22001     在线</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>  RK3588-002   22002     在线</span></span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>  RK3588-003   22003     离线</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>后续可以结合：</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#E36209;--shiki-dark:#F69D50>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>   MQTT 心跳</span></span>
+<span data-line=""><span style=--shiki-light:#E36209;--shiki-dark:#F69D50>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>   设备状态管理</span></span>
+<span data-line=""><span style=--shiki-light:#E36209;--shiki-dark:#F69D50>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>   CRM 烤机平台</span></span>
+<span data-line=""><span style=--shiki-light:#E36209;--shiki-dark:#F69D50>-</span><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>   Web SSH入口</span></span>
+<span data-line=""> </span>
+<span data-line=""><span style=--shiki-light:#24292E;--shiki-dark:#ADBAC7>形成完整远程设备运维平台。</span></span><button aria-label=复制代码 class=rehype-pretty-copy type=button data="# 基于 Windows VPS + SSH 反向隧道的 RK3588 远程维护平台搭建教程
+
+## 1. 项目目标
+
+解决工业现场 RK3588 设备：
+
+-   使用 4G SIM 卡联网
+-   无公网 IP
+-   无法直接 SSH
+-   需要远程维护
+
+最终实现：
+
+&#x60;&#x60;&#x60; bash
+ssh rk3588-001
+&#x60;&#x60;&#x60;
+
+直接进入目标设备。
+
+------------------------------------------------------------------------
+
+# 2. 总体架构
+
+    管理员电脑
+
+        |
+        | SSH 22
+        |
+        v
+
+    Windows VPS
+    121.5.44.210
+
+        |
+        | SSH Reverse Tunnel
+        |
+        +----------------+
+                         |
+                  localhost:22001
+                         |
+                         v
+
+                  RK3588-001
+                  Ubuntu 22.04
+                  4G SIM
+
+------------------------------------------------------------------------
+
+# 3. Windows VPS 配置
+
+## 3.1 安装 OpenSSH Server
+
+Windows VPS 安装：
+
+OpenSSH Server
+
+启动：
+
+&#x60;&#x60;&#x60; powershell
+Start-Service sshd
+&#x60;&#x60;&#x60;
+
+设置开机启动：
+
+&#x60;&#x60;&#x60; powershell
+Set-Service sshd -StartupType Automatic
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+## 3.2 修改 sshd_config
+
+文件：
+
+    C:\ProgramData\ssh\sshd_config
+
+增加：
+
+&#x60;&#x60;&#x60; conf
+AllowTcpForwarding yes
+GatewayPorts yes
+AllowAgentForwarding yes
+&#x60;&#x60;&#x60;
+
+重启：
+
+&#x60;&#x60;&#x60; powershell
+Restart-Service sshd
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+# 4. 配置 VPS 登录密钥
+
+管理员电脑生成：
+
+&#x60;&#x60;&#x60; bash
+ssh-keygen -t ed25519
+&#x60;&#x60;&#x60;
+
+复制：
+
+&#x60;&#x60;&#x60; bash
+cat ~/.ssh/id_ed25519.pub
+&#x60;&#x60;&#x60;
+
+添加到：
+
+    C:\ProgramData\ssh\administrators_authorized_keys
+
+权限：
+
+&#x60;&#x60;&#x60; powershell
+icacls C:\ProgramData\ssh\administrators_authorized_keys /inheritance:r
+
+icacls C:\ProgramData\ssh\administrators_authorized_keys /grant SYSTEM:F
+
+icacls C:\ProgramData\ssh\administrators_authorized_keys /grant Administrators:F
+&#x60;&#x60;&#x60;
+
+测试：
+
+&#x60;&#x60;&#x60; bash
+ssh administrator@121.5.44.210
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+# 5. RK3588-001 配置反向 SSH
+
+设备生成密钥：
+
+&#x60;&#x60;&#x60; bash
+ssh-keygen -t ed25519
+&#x60;&#x60;&#x60;
+
+配置 autossh：
+
+    -R 22001:localhost:22
+
+表示：
+
+    VPS localhost:22001
+
+            |
+
+            |
+
+    RK3588 SSH 22
+
+测试：
+
+RK3588：
+
+&#x60;&#x60;&#x60; bash
+autossh \
+-M 0 \
+-N \
+-R 22001:localhost:22 \
+administrator@121.5.44.210
+&#x60;&#x60;&#x60;
+
+VPS：
+
+&#x60;&#x60;&#x60; powershell
+ssh dover@localhost -p 22001
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+# 6. RK3588 开机自动上线
+
+创建：
+
+    /etc/systemd/system/autossh-rk3588.service
+
+内容：
+
+&#x60;&#x60;&#x60; ini
+[Unit]
+Description=AutoSSH Reverse Tunnel to VPS
+After=network-online.target ssh.service
+Wants=network-online.target ssh.service
+
+[Service]
+Type=simple
+User=dover
+
+Environment=&#x22;AUTOSSH_GATETIME=0&#x22;
+
+ExecStartPre=/bin/bash -c &#x27;until ip route | grep default; do sleep 5; done&#x27;
+
+ExecStart=/usr/bin/autossh \
+-M 0 \
+-N \
+-o ServerAliveInterval=30 \
+-o ServerAliveCountMax=3 \
+-o ConnectTimeout=30 \
+-R 22001:localhost:22 \
+administrator@121.5.44.210
+
+Restart=always
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target
+&#x60;&#x60;&#x60;
+
+启动：
+
+&#x60;&#x60;&#x60; bash
+sudo systemctl daemon-reload
+
+sudo systemctl enable autossh-rk3588
+
+sudo systemctl start autossh-rk3588
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+# 新增 RK3588-002 设备接入教程
+
+## 1. 端口规划
+
+已有：
+
+    RK3588-001
+
+    VPS:
+    localhost:22001
+
+新增：
+
+    RK3588-002
+
+    VPS:
+    localhost:22002
+
+规则：
+
+  设备         VPS端口
+  ------------ ---------
+  RK3588-001   22001
+  RK3588-002   22002
+  RK3588-003   22003
+
+------------------------------------------------------------------------
+
+# 2. RK3588-002 配置
+
+安装：
+
+&#x60;&#x60;&#x60; bash
+sudo apt install autossh
+&#x60;&#x60;&#x60;
+
+生成密钥：
+
+&#x60;&#x60;&#x60; bash
+ssh-keygen -t ed25519
+&#x60;&#x60;&#x60;
+
+复制：
+
+&#x60;&#x60;&#x60; bash
+cat ~/.ssh/id_ed25519.pub
+&#x60;&#x60;&#x60;
+
+添加到 VPS：
+
+    C:\Users\Administrator\.ssh\authorized_keys
+
+------------------------------------------------------------------------
+
+# 3. 修改反向端口
+
+RK3588-001：
+
+&#x60;&#x60;&#x60; bash
+-R 22001:localhost:22
+&#x60;&#x60;&#x60;
+
+RK3588-002：
+
+&#x60;&#x60;&#x60; bash
+-R 22002:localhost:22
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+# 4. systemd 服务修改
+
+复制：
+
+    autossh-rk3588.service
+
+修改：
+
+&#x60;&#x60;&#x60; ini
+-R 22002:localhost:22
+&#x60;&#x60;&#x60;
+
+重新加载：
+
+&#x60;&#x60;&#x60; bash
+sudo systemctl daemon-reload
+
+sudo systemctl enable autossh-rk3588
+
+sudo systemctl start autossh-rk3588
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+# 5. VPS测试 RK3588-002
+
+Windows VPS：
+
+&#x60;&#x60;&#x60; powershell
+ssh dover@localhost -p 22002
+&#x60;&#x60;&#x60;
+
+成功进入：
+
+    RK3588-002
+
+------------------------------------------------------------------------
+
+# 6. 管理电脑 SSH 别名
+
+编辑：
+
+    ~/.ssh/config
+
+添加：
+
+## RK3588-001
+
+&#x60;&#x60;&#x60; sshconfig
+Host rk3588-001
+    HostName 121.5.44.210
+    User administrator
+    RemoteCommand ssh rk3588-001
+    RequestTTY yes
+&#x60;&#x60;&#x60;
+
+## RK3588-002
+
+&#x60;&#x60;&#x60; sshconfig
+Host rk3588-002
+    HostName 121.5.44.210
+    User administrator
+    RemoteCommand ssh rk3588-002
+    RequestTTY yes
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+# 7. 使用方式
+
+设备1：
+
+&#x60;&#x60;&#x60; bash
+ssh rk3588-001
+&#x60;&#x60;&#x60;
+
+设备2：
+
+&#x60;&#x60;&#x60; bash
+ssh rk3588-002
+&#x60;&#x60;&#x60;
+
+------------------------------------------------------------------------
+
+# 8. 工业化扩展
+
+设备管理：
+
+  设备编号     SSH端口   状态
+  ------------ --------- ------
+  RK3588-001   22001     在线
+  RK3588-002   22002     在线
+  RK3588-003   22003     离线
+
+后续可以结合：
+
+-   MQTT 心跳
+-   设备状态管理
+-   CRM 烤机平台
+-   Web SSH入口
+
+形成完整远程设备运维平台。" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add(&#x27;rehype-pretty-copied&#x27;);window.setTimeout(() => this.classList.remove(&#x27;rehype-pretty-copied&#x27;), 2500);" title=复制代码><span class=ready></span><span class=success></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;backdrop-filter: blur(3px);& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre></figure></details></article><div class="post-tags tags"><span class=tag>RK3588</span><span class=tag>VPN</span><span class=tag>SSH</span><span class=tag>反向隧道</span><span class=tag>Windows VPS</span><span class=tag>Linux</span><span class=tag>autossh</span><span class=tag>远程运维</span></div><section class="panel related-panel mobile-related"><h2>相关文章</h2><a href=/posts/rg200u-5g-debug/ class=related-item><img alt="" decoding=async height=116 loading=lazy src=/assets/rg200u-5g-cover.B59Xzrix_Z1Nlpam.webp width=140><span><strong>RG200U 5G 模块调试</strong><time datetime=2026-10-11T16:00:00.000Z>2026年10月12日</time></span></a><a href=/posts/why-astro/ class=related-item><img alt="" decoding=async height=116 loading=lazy src=/assets/why-astro.CAv1e6IG_Z1bnGOg.webp width=140><span><strong>为什么选择 Astro？</strong><time datetime=2024-05-15T06:18:53.000Z>2024年5月15日</time></span></a><a href=/posts/gblog/ class=related-item><img alt="" decoding=async height=116 loading=lazy src=/assets/gblog.CrwAZQHe_1yIRKI.webp width=140><span><strong>Gblog：基于 Astro 的简洁博客模板</strong><time datetime=2024-05-15T05:00:00.000Z>2024年5月15日</time></span></a><a href=/posts/ class=text-link>查看全部文章 →</a></section><nav aria-label=上一篇和下一篇 class="panel post-navigation"><a href=/posts/rg200u-5g-debug/ class=next-post><img alt="" decoding=async height=130 loading=lazy src=/assets/rg200u-5g-cover.B59Xzrix_Z1Nlpam.webp width=150><span><small>下一篇 →</small><strong>RG200U 5G 模块调试</strong></span></a></nav><section class="panel author-card" aria-label=博客作者><a href=/ class=brand><img alt="YP 标志" decoding=async height=56 loading=lazy src=/assets/yp-logo.Cy2_YaY7_tGRxt.webp width=56 class=brand-logo><span><strong>Yongjian Peng</strong><small>技术笔记与开发实践</small></span></a><p>记录技术学习、代码实践与开发中的思考。从工具到系统，让每一次探索都留下有用的笔记。</p><a href=/posts/ class="button primary">全部文章 →</a></section></div><aside aria-label=阅读导航 class=post-sidebar><details class="panel toc-panel" id=article-toc open><summary>本文目录</summary><nav aria-label=本文目录><ol class=toc-links><li><a href=#1-目标环境与替换参数 data-toc-link>1. 目标、环境与替换参数</a></li><li><a href=#2-连接架构与端口规划 data-toc-link>2. 连接架构与端口规划</a></li><li><a href=#3-windows-vps安装与配置-openssh data-toc-link>3. Windows VPS：安装与配置 OpenSSH</a></li><li class=toc-sub><a href=#安装服务并检查入口 data-toc-link>安装服务并检查入口</a></li><li class=toc-sub><a href=#配置转发与检查语法 data-toc-link>配置转发与检查语法</a></li><li><a href=#4-密钥放在哪里三条认证关系 data-toc-link>4. 密钥放在哪里：三条认证关系</a></li><li class=toc-sub><a href=#管理电脑生成密钥 data-toc-link>管理电脑生成密钥</a></li><li class=toc-sub><a href=#vps-的管理员授权文件 data-toc-link>VPS 的管理员授权文件</a></li><li><a href=#5-rk3588-001先手动打通反向隧道 data-toc-link>5. RK3588-001：先手动打通反向隧道</a></li><li><a href=#6-systemd开机自动上线 data-toc-link>6. systemd：开机自动上线</a></li><li><a href=#7-rk3588-002新增一台设备 data-toc-link>7. RK3588-002：新增一台设备</a></li><li><a href=#8-管理电脑一个别名进入目标设备 data-toc-link>8. 管理电脑：一个别名进入目标设备</a></li><li><a href=#9-原始调试记录与故障判读 data-toc-link>9. 原始调试记录与故障判读</a></li><li class=toc-sub><a href=#按链路逐段排查 data-toc-link>按链路逐段排查</a></li><li><a href=#10-验收停用与后续扩展 data-toc-link>10. 验收、停用与后续扩展</a></li><li><a href=#11-来源修正对照与完整原稿 data-toc-link>11. 来源、修正对照与完整原稿</a></li></ol></nav></details><section class="panel related-panel"><h2>相关文章</h2><a href=/posts/rg200u-5g-debug/ class=related-item><img alt="" decoding=async height=116 loading=lazy src=/assets/rg200u-5g-cover.B59Xzrix_Z1Nlpam.webp width=140><span><strong>RG200U 5G 模块调试</strong><time datetime=2026-10-11T16:00:00.000Z>2026年10月12日</time></span></a><a href=/posts/why-astro/ class=related-item><img alt="" decoding=async height=116 loading=lazy src=/assets/why-astro.CAv1e6IG_Z1bnGOg.webp width=140><span><strong>为什么选择 Astro？</strong><time datetime=2024-05-15T06:18:53.000Z>2024年5月15日</time></span></a><a href=/posts/gblog/ class=related-item><img alt="" decoding=async height=116 loading=lazy src=/assets/gblog.CrwAZQHe_1yIRKI.webp width=140><span><strong>Gblog：基于 Astro 的简洁博客模板</strong><time datetime=2024-05-15T05:00:00.000Z>2024年5月15日</time></span></a><a href=/posts/ class=text-link>查看全部文章 →</a></section></aside></div></main><footer class="container site-footer"><div class=footer-brand><a href=/ class=brand><img alt="YP 标志" decoding=async height=56 loading=lazy src=/assets/yp-logo.Cy2_YaY7_tGRxt.webp width=56 class=brand-logo><span><strong>Yongjian Peng</strong><small>技术笔记与开发实践</small></span></a><p>© 2026 Yongjian Peng · 保持好奇，持续记录</p></div><nav aria-label=页脚导航 class=footer-nav><a href=/posts>文章</a><a href=/categories>分类</a><a href=/timeline>时间线</a><a href=/posts/gblog>关于博客</a><a href=/friends>友链</a></nav><div class=footer-links><a href=https://github.com/yongjian-peng rel="noopener noreferrer" target=_blank>GitHub ↗</a><a href=/sitemap-index.xml>站点地图</a></div><img alt="" decoding=async height=113 loading=lazy src=/assets/circuit-mountains.CMAd1PHd_Z8t7YB.webp width=340 class=footer-mountains></footer></body></html>
